@@ -8,7 +8,7 @@ import {
 
 const AuthContext = createContext(null);
 const ThemeContext = createContext(null);
-const API_URL = "http://98.84.38.99";
+const API_URL = "https://api.vaibhavkarbhantnal.me";
 const REAL_TOKEN = "pipeline-test-token-123";
 
 function AuthProvider({ children }) {
