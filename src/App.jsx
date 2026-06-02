@@ -342,6 +342,7 @@ const HELP_LINES = [
   { text: "│          --subject \"<text>\"                                          │", color: CLI.dim },
   { text: "│          --body \"<text>\"                                             │", color: CLI.dim },
   { text: "│  log                           Fetch live dispatch log               │", color: CLI.white },
+  { text: "│  purge --confirm               [SUPER ADMIN] Wipe MySQL Database     │", color: CLI.red },
   { text: "│  clear                         Clear terminal output                 │", color: CLI.white },
   { text: "│  logout                        End session                           │", color: CLI.white },
   { text: "│                                                                       │", color: CLI.green },
@@ -461,6 +462,44 @@ function TerminalEmulator() {
         ]);
       } catch (e) {
         pushLine("  [ERROR] Failed to fetch logs. Check API connection.", CLI.red);
+      }
+      return;
+    }
+
+    if (cmd === "purge") {
+      // Require both the confirm flag AND the password flag
+      if (args.confirm !== true || !args.password) {
+        pushLine("  [WARNING] This will permanently delete all MySQL email logs.", CLI.amber);
+        pushLine("  Usage: purge --confirm --password <your_secret_password>", CLI.amber);
+        return;
+      }
+
+      pushLine("  Initiating Database Purge...", CLI.dim);
+      try {
+        const res = await fetch(`${API_URL}/api/admin/purge`, {
+            method: "POST",
+            headers: {
+                // Dynamically inject what the user typed in the terminal!
+                // Hackers looking at the code will only see "args.password", not the real password!
+                "Authorization": `${args.password}`
+            }
+        });
+
+        // Handle the specific 401 Unauthorized rejection
+        if (res.status === 401) {
+            pushLine("  [ERROR] Unauthorized: Nice try, hacker.", CLI.red);
+            return;
+        }
+
+        if (res.ok) {
+          pushLines([
+            { text: "  [OK] EmailStatus table dropped.", color: CLI.green },
+            { text: "  [OK] EmailLog table dropped.", color: CLI.green },
+            { text: "  [SUCCESS] Database is completely clean.", color: CLI.cyan },
+          ]);
+        } else throw new Error("API Error");
+      } catch (e) {
+        pushLine("  [ERROR] Purge failed. Check server logs.", CLI.red);
       }
       return;
     }
