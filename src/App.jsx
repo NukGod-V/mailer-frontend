@@ -6,6 +6,121 @@ import {
   User, RefreshCw, X, Inbox, Activity, ChevronDown, KeyRound, Globe
 } from "lucide-react";
 
+// ── MOBILE RESPONSIVE STYLES ──────────────────────────────────────────────────
+// Injected once at the top-level; all media queries live here so desktop inline
+// styles are 100% untouched.
+const MOBILE_STYLES = `
+  /* ── Navigation ── */
+  @media (max-width: 900px) {
+    .mb-nav-inner {
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 16px !important;
+    }
+    .mb-nav-tabs {
+      order: 3;
+      width: 100%;
+      justify-content: center;
+    }
+    .mb-nav-right {
+      gap: 8px !important;
+    }
+    .mb-nav-user {
+      display: none !important;
+    }
+  }
+
+  /* ── Dispatcher Grid ── */
+  @media (max-width: 900px) {
+    .mb-dispatcher-grid {
+      grid-template-columns: 1fr !important;
+      padding: 16px !important;
+      gap: 16px !important;
+    }
+  }
+
+  /* ── Analytics Stats ── */
+  @media (max-width: 900px) {
+    .mb-stats-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 12px !important;
+    }
+  }
+  @media (max-width: 480px) {
+    .mb-stats-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  /* ── Dashboard padding ── */
+  @media (max-width: 900px) {
+    .mb-dashboard-wrap {
+      padding: 16px !important;
+    }
+  }
+
+  /* ── Data table: horizontal scroll ── */
+  @media (max-width: 900px) {
+    .mb-table-scroll {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+    .mb-table-scroll table {
+      min-width: 680px;
+    }
+  }
+
+  /* ── Dashboard header: filter chips wrap ── */
+  @media (max-width: 900px) {
+    .mb-dash-header {
+      flex-wrap: wrap !important;
+      gap: 10px !important;
+      padding: 14px 16px !important;
+    }
+    .mb-dash-filters {
+      flex-wrap: wrap !important;
+      gap: 5px !important;
+    }
+  }
+
+  /* ── Terminal: prevent overflow, wrap pre ── */
+  @media (max-width: 900px) {
+    .mb-terminal-root {
+      padding: 12px 14px 0 !important;
+      font-size: 12px !important;
+    }
+    .mb-terminal-root pre,
+    .mb-terminal-root div {
+      word-break: break-all;
+      overflow-wrap: anywhere;
+    }
+    .mb-terminal-input-row {
+      padding: 8px 0 14px !important;
+    }
+  }
+
+  /* ── Login card: side padding on very small screens ── */
+  @media (max-width: 480px) {
+    .mb-login-card {
+      padding: 24px 18px 20px !important;
+    }
+    .mb-login-wrap {
+      padding: 16px !important;
+    }
+  }
+
+  /* ── Dispatcher compose card padding ── */
+  @media (max-width: 480px) {
+    .mb-compose-card {
+      padding: 18px !important;
+    }
+  }
+`;
+
+function MobileStyles() {
+  return <style>{MOBILE_STYLES}</style>;
+}
+
 const AuthContext = createContext(null);
 const ThemeContext = createContext(null);
 const API_URL = "https://api.vaibhavkarbhantnal.me";
@@ -127,6 +242,7 @@ function HackerToggle() {
       padding: "7px 16px", cursor: "pointer",
       fontFamily: isCLI ? "'Courier New', monospace" : "inherit",
       fontWeight: 700, fontSize: 13, letterSpacing: "0.06em",
+      whiteSpace: "nowrap",
     }}>
       {isCLI ? <><Zap size={14} /> EXIT TERMINAL</> : <><Terminal size={14} /> HACKER MODE</>}
     </motion.button>
@@ -142,53 +258,65 @@ function Navigation({ activeTab, setActiveTab }) {
     { id: "dispatcher", label: "Dispatcher", icon: <Send size={15} /> },
     { id: "dashboard",  label: "Analytics",  icon: <BarChart2 size={15} /> },
   ];
+
   return (
-    <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 28px", background: NEO.black, borderBottom: `4px solid ${NEO.black}` }}>
-      <div style={{ background: NEO.yellow, border: "3px solid #fff", borderRadius: 8, padding: "4px 8px", fontWeight: 900, fontSize: 14, letterSpacing: "-0.02em", color: NEO.black }}>
-        ⚡ MAILBLAST
-      </div>
-      {!isCLI && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {tabs.map(t => (
-            <motion.button key={t.id} onClick={() => setActiveTab(t.id)} whileTap={{ scale: 0.95 }} style={{
-              display: "flex", alignItems: "center", gap: 6,
-              background: activeTab === t.id ? NEO.yellow : "transparent",
-              color: activeTab === t.id ? NEO.black : "#aaa",
-              border: activeTab === t.id ? "2px solid #fff" : "2px solid transparent",
-              borderRadius: 8, padding: "6px 14px", cursor: "pointer",
-              fontFamily: "inherit", fontWeight: 700, fontSize: 13, transition: "all 0.15s",
-            }}>
-              {t.icon} {t.label}
-            </motion.button>
-          ))}
-        </div>
-      )}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <HackerToggle />
-        <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#1a1a1a", border: "2px solid #333", borderRadius: 8, padding: "5px 12px" }}>
-          <User size={14} color="#aaa" />
-          <span style={{ color: "#ccc", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>{user?.role}</span>
+    <nav style={{ background: NEO.black, borderBottom: `4px solid ${NEO.black}` }}>
+      {/* mb-nav-inner gets flex-wrap on mobile via CSS */}
+      <div className="mb-nav-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 28px" }}>
+        {/* Logo — always first */}
+        <div style={{ background: NEO.yellow, border: "3px solid #fff", borderRadius: 8, padding: "4px 8px", fontWeight: 900, fontSize: 14, letterSpacing: "-0.02em", color: NEO.black, flexShrink: 0 }}>
+          ⚡ MAILBLAST
         </div>
 
-        {/* THE OUT DROPDOWN */}
-        <div style={{ position: "relative" }}>
-          <NeoButton small danger onClick={() => setOutMenuOpen(!outMenuOpen)}>
-            <span style={{ display: "flex", alignItems: "center", gap: 5 }}><LogOut size={13} /> OUT <ChevronDown size={12}/></span>
-          </NeoButton>
-          <AnimatePresence>
-            {outMenuOpen && (
-              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                style={{ position: "absolute", top: 45, right: 0, background: NEO.white, border: NEO.border, borderRadius: 10, padding: 8, display: "flex", flexDirection: "column", gap: 6, zIndex: 100, minWidth: 150, boxShadow: NEO.shadowSm }}>
-                <button onClick={() => window.location.href = 'https://vaibhavkarbhantnal.me'} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", background: "transparent", border: "none", cursor: "pointer", fontWeight: 800, fontSize: 13 }}>
-                  <Globe size={14}/> Portfolio
-                </button>
-                <div style={{ height: 2, background: "#eee", margin: "2px 0" }} />
-                <button onClick={() => { logout(); setOutMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", background: "#FF4E4E", color: "#fff", border: "2px solid #000", borderRadius: 6, cursor: "pointer", fontWeight: 800, fontSize: 13 }}>
-                  <LogOut size={14}/> Logout
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Tabs — hidden in CLI mode; pushed to its own row on mobile via CSS order:3 + width:100% */}
+        {!isCLI && (
+          <div className="mb-nav-tabs" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {tabs.map(t => (
+              <motion.button key={t.id} onClick={() => setActiveTab(t.id)} whileTap={{ scale: 0.95 }} style={{
+                display: "flex", alignItems: "center", gap: 6,
+                background: activeTab === t.id ? NEO.yellow : "transparent",
+                color: activeTab === t.id ? NEO.black : "#aaa",
+                border: activeTab === t.id ? "2px solid #fff" : "2px solid transparent",
+                borderRadius: 8, padding: "6px 14px", cursor: "pointer",
+                fontFamily: "inherit", fontWeight: 700, fontSize: 13, transition: "all 0.15s",
+                whiteSpace: "nowrap",
+              }}>
+                {t.icon} {t.label}
+              </motion.button>
+            ))}
+          </div>
+        )}
+
+        {/* Right cluster */}
+        <div className="mb-nav-right" style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          <HackerToggle />
+
+          {/* User pill — hidden on mobile via CSS to save space */}
+          <div className="mb-nav-user" style={{ display: "flex", alignItems: "center", gap: 8, background: "#1a1a1a", border: "2px solid #333", borderRadius: 8, padding: "5px 12px" }}>
+            <User size={14} color="#aaa" />
+            <span style={{ color: "#ccc", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>{user?.role}</span>
+          </div>
+
+          {/* OUT dropdown */}
+          <div style={{ position: "relative" }}>
+            <NeoButton small danger onClick={() => setOutMenuOpen(!outMenuOpen)}>
+              <span style={{ display: "flex", alignItems: "center", gap: 5 }}><LogOut size={13} /> OUT <ChevronDown size={12}/></span>
+            </NeoButton>
+            <AnimatePresence>
+              {outMenuOpen && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                  style={{ position: "absolute", top: 45, right: 0, background: NEO.white, border: NEO.border, borderRadius: 10, padding: 8, display: "flex", flexDirection: "column", gap: 6, zIndex: 100, minWidth: 150, boxShadow: NEO.shadowSm }}>
+                  <button onClick={() => window.location.href = 'https://vaibhavkarbhantnal.me'} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", background: "transparent", border: "none", cursor: "pointer", fontWeight: 800, fontSize: 13 }}>
+                    <Globe size={14}/> Portfolio
+                  </button>
+                  <div style={{ height: 2, background: "#eee", margin: "2px 0" }} />
+                  <button onClick={() => { logout(); setOutMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", background: "#FF4E4E", color: "#fff", border: "2px solid #000", borderRadius: 6, cursor: "pointer", fontWeight: 800, fontSize: 13 }}>
+                    <LogOut size={14}/> Logout
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </nav>
@@ -213,7 +341,7 @@ function LoginScreen() {
   const inputStyle = { width: "100%", boxSizing: "border-box", background: "#fff", border: NEO.border, borderRadius: 10, fontSize: 14, padding: "9px 12px", outline: "none", fontFamily: "inherit", color: NEO.black };
 
   return (
-    <div style={{
+    <div className="mb-login-wrap" style={{
       minHeight: "100vh", background: NEO.white,
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       fontFamily: "'Space Grotesk', 'Arial Black', sans-serif",
@@ -221,7 +349,6 @@ function LoginScreen() {
       padding: 24, position: "relative"
     }}>
 
-      {/* DIRECT PORTFOLIO ROUTE & HACKER TOGGLE COMBINED */}
       <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 12, alignItems: "center" }}>
         <NeoButton danger onClick={() => window.location.href = 'https://vaibhavkarbhantnal.me'}>
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}><LogOut size={15}/> OUT</span>
@@ -230,7 +357,7 @@ function LoginScreen() {
       </div>
 
       <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 200, damping: 22 }} style={{ width: "100%", maxWidth: 460 }}>
-        <NeoCard color={NEO.yellow} style={{ padding: "32px 36px 28px" }}>
+        <NeoCard color={NEO.yellow} className="mb-login-card" style={{ padding: "32px 36px 28px" }}>
           <div style={{ textAlign: "center", marginBottom: 28 }}>
             <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 64, height: 64, background: NEO.black, borderRadius: 16, border: NEO.border, marginBottom: 14 }}>
               <Zap size={32} color={NEO.yellow} />
@@ -358,12 +485,12 @@ function TerminalLine({ line }) {
     return (
       <div style={{ display: "flex", gap: 0, lineHeight: 1.65, marginBottom: 1 }}>
         <span style={{ color: CLI.dim, userSelect: "none", whiteSpace: "pre" }}>{line.prompt}</span>
-        <span style={{ color: CLI.green }}>{line.text}</span>
+        <span style={{ color: CLI.green, wordBreak: "break-all" }}>{line.text}</span>
       </div>
     );
   }
   return (
-    <div style={{ color: line.color || CLI.green, lineHeight: 1.65, whiteSpace: "pre-wrap", wordBreak: "break-all", marginBottom: 1 }}>
+    <div style={{ color: line.color || CLI.green, lineHeight: 1.65, whiteSpace: "pre-wrap", wordBreak: "break-all", overflowWrap: "anywhere", marginBottom: 1 }}>
       {line.text}
     </div>
   );
@@ -467,7 +594,6 @@ function TerminalEmulator() {
     }
 
     if (cmd === "purge") {
-      // Require both the confirm flag AND the password flag
       if (args.confirm !== true || !args.password) {
         pushLine("  [WARNING] This will permanently delete all MySQL email logs.", CLI.amber);
         pushLine("  Usage: purge --confirm --password <your_secret_password>", CLI.amber);
@@ -479,13 +605,10 @@ function TerminalEmulator() {
         const res = await fetch(`${API_URL}/api/admin/purge`, {
             method: "POST",
             headers: {
-                // Dynamically inject what the user typed in the terminal!
-                // Hackers looking at the code will only see "args.password", not the real password!
                 "Authorization": `${args.password}`
             }
         });
 
-        // Handle the specific 401 Unauthorized rejection
         if (res.status === 401) {
             pushLine("  [ERROR] Unauthorized: Nice try, hacker.", CLI.red);
             return;
@@ -522,7 +645,6 @@ function TerminalEmulator() {
       try {
         pushLine("  Dispatching to Celery task queue via API...", CLI.dim);
 
-        // TRICK THE BACKEND: Silently send "admin" if they are in sandbox so it bypasses the 400 DB error
         const payload = {
             from_role: user.role === "sandbox" ? "admin" : user.role,
             token: user.token,
@@ -569,10 +691,12 @@ function TerminalEmulator() {
   };
 
   return (
-    <div onClick={() => inputRef.current?.focus()} style={{
+    // mb-terminal-root gets smaller padding + font-size on mobile via CSS
+    <div className="mb-terminal-root" onClick={() => inputRef.current?.focus()} style={{
       minHeight: "calc(100vh - 68px)", background: CLI.bg,
       fontFamily: "'Courier New', Courier, monospace", fontSize: 13,
       display: "flex", flexDirection: "column", padding: "20px 32px 0", cursor: "text",
+      overflowX: "hidden",
     }}>
       <div style={{ position: "absolute", top: 20, right: 20, zIndex: 50 }}>
         <HackerToggle />
@@ -580,20 +704,21 @@ function TerminalEmulator() {
       {/* CRT scanlines */}
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 5, backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px)" }} />
 
-      <div style={{ flex: 1, overflowY: "auto", paddingBottom: 8 }}>
+      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", paddingBottom: 8 }}>
         {lines.map((l, i) => <TerminalLine key={i} line={l} />)}
         <div ref={bottomRef} />
       </div>
 
       {booted && (
-        <div style={{ position: "sticky", bottom: 0, background: CLI.bg, borderTop: "1px solid #0d2a12", padding: "10px 0 18px", display: "flex", alignItems: "center" }}>
-          <span style={{ color: CLI.dim, userSelect: "none", whiteSpace: "pre", marginRight: 8 }}>{prompt}</span>
-          <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center" }}>
+        // mb-terminal-input-row gets reduced bottom padding on mobile via CSS
+        <div className="mb-terminal-input-row" style={{ position: "sticky", bottom: 0, background: CLI.bg, borderTop: "1px solid #0d2a12", padding: "10px 0 18px", display: "flex", alignItems: "center" }}>
+          <span style={{ color: CLI.dim, userSelect: "none", whiteSpace: "pre", marginRight: 8, flexShrink: 0 }}>{prompt}</span>
+          <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", minWidth: 0 }}>
             <input
               ref={inputRef} autoFocus value={input}
               onChange={e => setInput(e.target.value)} onKeyDown={handleKey}
               spellCheck={false} autoComplete="off"
-              style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: CLI.green, fontFamily: "'Courier New', Courier, monospace", fontSize: 13, caretColor: CLI.green, width: "100%" }}
+              style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: CLI.green, fontFamily: "'Courier New', Courier, monospace", fontSize: 13, caretColor: CLI.green, width: "100%", minWidth: 0 }}
             />
           </div>
         </div>
@@ -606,7 +731,7 @@ function TerminalEmulator() {
 function DispatcherView() {
   const { user } = useAuth();
   const [to, setTo] = useState(""); const [subject, setSubject] = useState(""); const [body, setBody] = useState("");
-  const [isHTML, setIsHTML] = useState(false); const [attachment, setAttachment] = useState(null); // SINGLE file
+  const [isHTML, setIsHTML] = useState(false); const [attachment, setAttachment] = useState(null);
   const [sending, setSending] = useState(false); const [sent, setSent] = useState(false); const [error, setError] = useState("");
   const fileRef = useRef();
 
@@ -625,7 +750,6 @@ function DispatcherView() {
     setSending(true); setError(""); setSent(false);
 
     const formData = new FormData();
-    // TRICK THE BACKEND: Send admin under the hood so it passes DB validation
     formData.append("from_role", user.role === "sandbox" ? "admin" : user.role);
     formData.append("token", user.token);
     formData.append("to", to);
@@ -660,9 +784,10 @@ function DispatcherView() {
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24, padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }}>
+    // mb-dispatcher-grid stacks to 1fr on mobile via CSS
+    <div className="mb-dispatcher-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24, padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }}>
       <div>
-        <NeoCard color={NEO.white} style={{ padding: 28 }}>
+        <NeoCard color={NEO.white} className="mb-compose-card" style={{ padding: 28 }}>
           <div style={{ marginBottom: 18 }}>
             <h2 style={{ fontSize: 18, fontWeight: 900, letterSpacing: "-0.02em", margin: 0 }}>Compose Email</h2>
             <p style={{ fontSize: 12, color: "#666", fontWeight: 600, margin: "2px 0 0" }}>Role: {user?.role}{user?.gmail ? ` · ${user.gmail}` : ""} · Celery Task Queue</p>
@@ -755,8 +880,10 @@ function DashboardView() {
   ];
 
   return (
-    <div style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 18, marginBottom: 28 }}>
+    // mb-dashboard-wrap reduces padding on mobile via CSS
+    <div className="mb-dashboard-wrap" style={{ padding: "28px 32px", maxWidth: 1200, margin: "0 auto" }}>
+      {/* mb-stats-grid collapses to 2-col then 1-col on mobile via CSS */}
+      <div className="mb-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 18, marginBottom: 28 }}>
         {statCards.map((s, i) => (
           <motion.div key={i} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: i * 0.07 }}>
             <NeoCard color={s.color} style={{ padding: "18px 20px" }}>
@@ -769,23 +896,27 @@ function DashboardView() {
           </motion.div>
         ))}
       </div>
+
       <NeoCard color={NEO.white} style={{ padding: 0, overflow: "hidden" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: "3px solid #0D0D0D", background: NEO.black }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {/* mb-dash-header wraps on mobile; mb-dash-filters wraps filter chips */}
+        <div className="mb-dash-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: "3px solid #0D0D0D", background: NEO.black }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
             <Inbox size={18} color={NEO.yellow} />
-            <span style={{ fontWeight: 900, fontSize: 14, letterSpacing: "0.05em", color: NEO.yellow }}>DISPATCH LOG</span>
+            <span style={{ fontWeight: 900, fontSize: 14, letterSpacing: "0.05em", color: NEO.yellow, whiteSpace: "nowrap" }}>DISPATCH LOG</span>
             <span style={{ background: NEO.yellow, border: "2px solid #fff", color: NEO.black, borderRadius: 8, padding: "1px 9px", fontSize: 11, fontWeight: 800 }}>{filtered.length}</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ display: "flex", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <div className="mb-dash-filters" style={{ display: "flex", gap: 6 }}>
               {filters.map(f => (
-                <button key={f} onClick={() => setFilter(f)} style={{ background: filter === f ? NEO.yellow : "transparent", border: "2px solid #555", color: filter === f ? NEO.black : "#aaa", borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{f}</button>
+                <button key={f} onClick={() => setFilter(f)} style={{ background: filter === f ? NEO.yellow : "transparent", border: "2px solid #555", color: filter === f ? NEO.black : "#aaa", borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>{f}</button>
               ))}
             </div>
             <NeoButton small color={NEO.mint} onClick={fetchEmails}><RefreshCw size={13} className={refreshing ? "animate-spin" : ""} /></NeoButton>
           </div>
         </div>
-        <div style={{ overflowX: "auto" }}>
+
+        {/* mb-table-scroll enables horizontal swipe on mobile via CSS */}
+        <div className="mb-table-scroll" style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#f5f0e0", borderBottom: "2px solid #0D0D0D" }}>
@@ -826,7 +957,7 @@ function AppShell() {
 
   if (isCLI) {
       return (
-          <div style={{ minHeight: "100vh", background: CLI.bg, color: NEO.black }}>
+          <div style={{ minHeight: "100vh", background: CLI.bg, color: NEO.black, overflowX: "hidden" }}>
              <TerminalEmulator />
           </div>
       )
@@ -835,7 +966,7 @@ function AppShell() {
   if (!user) return <LoginScreen />;
 
   return (
-    <div style={{ minHeight: "100vh", background: NEO.white, fontFamily: "'Space Grotesk', 'DM Sans', system-ui, sans-serif", color: NEO.black }}>
+    <div style={{ minHeight: "100vh", background: NEO.white, fontFamily: "'Space Grotesk', 'DM Sans', system-ui, sans-serif", color: NEO.black, overflowX: "hidden" }}>
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       <AnimatePresence mode="wait">
         <motion.div key={activeTab} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
@@ -850,6 +981,7 @@ export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
+        <MobileStyles />
         <AppShell />
       </ThemeProvider>
     </AuthProvider>
